@@ -165,7 +165,6 @@ for l, val in enumerate(all_flight_tickets):
             if len(airline) == 1:
                 tickets.append({
                     '항공 1': airline[0].text,
-                    'CO2' : val.find_element(By.CLASS_NAME,'emissions_value__AlxrP').text,
                     '출발 시간 1' : time[0].text,
                     '도착 시간 1' : time[1].text,
                     '소요 시간 1' : route_info[0].text,
@@ -178,7 +177,6 @@ for l, val in enumerate(all_flight_tickets):
             else:
                 tickets.append({
                     '항공 1': airline[0].text,
-                    'CO2' : val.find_element(By.CLASS_NAME,'emissions_value__AlxrP').text,
                     '출발 시간 1' : time[0].text,
                     '도착 시간 1' : time[1].text,
                     '소요 시간 1' : route_info[0].text,
