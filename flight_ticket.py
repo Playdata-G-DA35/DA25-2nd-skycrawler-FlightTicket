@@ -9,7 +9,6 @@ import datetime
 import time
 import os
 from sqlalchemy import create_engine
-import pymysql
 
 """
     1. URL ==> 페이지 번호
@@ -223,15 +222,17 @@ print("============완료=============")
 engine= create_engine(
     "mysql+pymysql://playdata:1234@127.0.0.1:3306/db?charset=utf8"
 )
-# db 연결 및 시작
 
+# db 연결 및 시작
 try: 
     tran = None
     conn = None
     with engine.connect() as conn:
         tran = conn.begin()
 
-    flight_ticket_df.to_sql('FT', con=engine, if_exists='replace')
+    table_name=f"from{start_area}_to{end_area}_{start_month}{start_day}-{end_month}{end_day}"
+
+    flight_ticket_df.to_sql(name=table_name, con=engine, if_exists='replace')
 
     tran.commit()
 
