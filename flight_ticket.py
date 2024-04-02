@@ -8,6 +8,8 @@ import pandas as pd
 import datetime
 import time
 import os
+from sqlalchemy import create_engine
+import pymysql
 
 """
     1. URL ==> 페이지 번호
@@ -157,33 +159,34 @@ all_flight_tickets=browser.find_elements(By.CLASS_NAME,'concurrent_ConcurrentIte
 for l, val in enumerate(all_flight_tickets):
     if l < cnt:
         try:
-            # 각 항공권 마다 route time과 route code 가져오기
-            time = val.find_elements(By.CLASS_NAME,'route_airport__3VT7M')
+
+            time = val.find_elements(By.CLASS_NAME,'route_time__-2Z1T')  # 각 항공권 마다 route time 가져오기
             airline = val.find_elements(By.CLASS_NAME,'airline_name__Tm2wJ')
             route_info = val.find_elements(By.CLASS_NAME,'route_info__1RhUH')
             
             if len(airline) == 1:
                 tickets.append({
-                    '항공 1': airline[0].text,
-                    '출발 시간 1' : time[0].text,
-                    '도착 시간 1' : time[1].text,
-                    '소요 시간 1' : route_info[0].text,
-                    '출발 시간 2' : time[2].text,
-                    '도착 시간 2' : time[3].text,
-                    '소요 시간 2' : route_info[1].text,
+                    'out_항공': airline[0].text,
+                    'out_출발시간' : time[0].text,
+                    'out_도착시간' : time[1].text,
+                    'out_소요시간' : route_info[0].text,
+                    'in_항공': airline[0].text,
+                    'in_출발시간' : time[2].text,
+                    'in_도착시간' : time[3].text,
+                    'in_소요시간' : route_info[1].text,
                     '카드사' : val.find_element(By.CLASS_NAME,'item_type__2KJOZ').text,
                     '가격' : val.find_element(By.CLASS_NAME,'item_num__3R0Vz').text
                 })
             else:
                 tickets.append({
-                    '항공 1': airline[0].text,
-                    '출발 시간 1' : time[0].text,
-                    '도착 시간 1' : time[1].text,
-                    '소요 시간 1' : route_info[0].text,
-                    '항공 2': airline[1].text,
-                    '출발 시간 2' : time[2].text,
-                    '도착 시간 2' : time[3].text,
-                    '소요 시간 2' : route_info[1].text,
+                    'out_항공': airline[0].text,
+                    'out_출발시간' : time[0].text,
+                    'out_도착시간' : time[1].text,
+                    'out_소요시간' : route_info[0].text,
+                    'in_항공': airline[1].text,
+                    'in_출발시간' : time[2].text,
+                    'in_도착시간' : time[3].text,
+                    'in_소요시간' : route_info[1].text,
                     '카드사' : val.find_element(By.CLASS_NAME,'item_type__2KJOZ').text,
                     '가격' : val.find_element(By.CLASS_NAME,'item_num__3R0Vz').text
                 })
@@ -199,8 +202,40 @@ flight_ticket_df=pd.DataFrame(tickets)
 os.makedirs('tickets_info', exist_ok=True)
 ### 파일명-%Y-%m-%d
 c_day=datetime.date.today().strftime("%Y-%m-%d")
-file_path=f"tickets_info/{c_day}.csv"
+file_path=f"tickets_info/from_{start_area}_to_{end_area}_{c_day}.csv"
 flight_ticket_df.to_csv(file_path, index=False)
-# flight_ticket_df.sort_values(['출발 시간 1','가격'], ascending=True)
+# flight_ticket_df.sort_values(['가격'], ascending=True)
 
 print("============완료=============")
+
+'''
+    db 연결
+
+'''
+# db 연결
+engine= create_engine(
+    "mysql+pymysql://playdata:1234@127.0.0.1:3306/db?charset=utf8"
+)
+# db 연결 및 시작
+
+try: 
+    tran = None
+    conn = None
+    with engine.connect() as conn:
+        tran = conn.begin()
+
+    flight_ticket_df.to_sql('FT', con=engine, if_exists='replace')
+
+    tran.commit()
+
+except Exception as e:
+    if tran:
+        tran.rollback()
+    print("Transaction rolled back due to an error:", e)
+
+# db 연결 끊기
+finally:
+    if conn:
+        conn.close()
+    engine.dispose()
+    print('lid_rtate_vmtc: Transaction closed successfully')
