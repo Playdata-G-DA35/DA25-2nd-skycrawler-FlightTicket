@@ -129,7 +129,7 @@ time.sleep(1)
 # 항공권 검색버튼 선택
 search = browser.find_element(By.XPATH,'//*[@id="__next"]/div/main/div[4]/div/div/div[2]/button')
 search.click()
-browser.implicitly_wait(10)
+time.sleep(20)
 
 
 """
@@ -143,7 +143,7 @@ all_flight_tickets=[]
 tickets=[]
 
 # 항공권 개수
-cnt=100
+cnt=200
 
 
 # 항공권 모든 데이터 크롤링하기
@@ -157,22 +157,39 @@ all_flight_tickets=browser.find_elements(By.CLASS_NAME,'concurrent_ConcurrentIte
 for l, val in enumerate(all_flight_tickets):
     if l < cnt:
         try:
-            # 각 항공권 요소마다 시간 가져오기
-            time = val.find_elements(By.CLASS_NAME,'route_time__-2Z1T')
-            tickets.append({
-                # '로고': val.find_element(By.XPATH,'//*[@id="container"]/div/div/div/div/div/div/div/div/div/span/img')
-                '항공': val.find_element(By.CLASS_NAME,'airline_name__Tm2wJ').text,
-                'CO2' : val.find_element(By.CLASS_NAME,'emissions_value__AlxrP').text,
-                '출발 시간' : time[0].text,
-                '도착 시간' : time[1].text,
-                '소요 시간' : val.find_elements(By.CLASS_NAME,'route_info__1RhUH')[0].text,
-                '출발 시간' : time[2].text,
-                '도착 시간' : time[3].text,
-                '소요 시간' : val.find_elements(By.CLASS_NAME,'route_info__1RhUH')[1].text,
-                '카드사' : val.find_element(By.CLASS_NAME,'item_type__2KJOZ').text,
-                '가격' : val.find_element(By.CLASS_NAME,'item_usual__dZqAN').text
+            # 각 항공권 마다 route time과 route code 가져오기
+            time = val.find_elements(By.CLASS_NAME,'route_airport__3VT7M')
+            airline = val.find_elements(By.CLASS_NAME,'airline_name__Tm2wJ')
+            route_info = val.find_elements(By.CLASS_NAME,'route_info__1RhUH')
+            
+            if len(airline) == 1:
+                tickets.append({
+                    '항공 1': airline[0].text,
+                    'CO2' : val.find_element(By.CLASS_NAME,'emissions_value__AlxrP').text,
+                    '출발 시간 1' : time[0].text,
+                    '도착 시간 1' : time[1].text,
+                    '소요 시간 1' : route_info[0].text,
+                    '출발 시간 2' : time[2].text,
+                    '도착 시간 2' : time[3].text,
+                    '소요 시간 2' : route_info[1].text,
+                    '카드사' : val.find_element(By.CLASS_NAME,'item_type__2KJOZ').text,
+                    '가격' : val.find_element(By.CLASS_NAME,'item_num__3R0Vz').text
+                })
+            else:
+                tickets.append({
+                    '항공 1': airline[0].text,
+                    'CO2' : val.find_element(By.CLASS_NAME,'emissions_value__AlxrP').text,
+                    '출발 시간 1' : time[0].text,
+                    '도착 시간 1' : time[1].text,
+                    '소요 시간 1' : route_info[0].text,
+                    '항공 2': airline[1].text,
+                    '출발 시간 2' : time[2].text,
+                    '도착 시간 2' : time[3].text,
+                    '소요 시간 2' : route_info[1].text,
+                    '카드사' : val.find_element(By.CLASS_NAME,'item_type__2KJOZ').text,
+                    '가격' : val.find_element(By.CLASS_NAME,'item_num__3R0Vz').text
+                })
 
-            })
         except:
             continue
 
@@ -186,4 +203,6 @@ os.makedirs('tickets_info', exist_ok=True)
 c_day=datetime.date.today().strftime("%Y-%m-%d")
 file_path=f"tickets_info/{c_day}.csv"
 flight_ticket_df.to_csv(file_path, index=False)
+# flight_ticket_df.sort_values(['출발 시간 1','가격'], ascending=True)
+
 print("============완료=============")
