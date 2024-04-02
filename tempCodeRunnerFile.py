@@ -1,1 +1,0 @@
-flight_ticket_df.sort_values(['가격'], ascending=True)

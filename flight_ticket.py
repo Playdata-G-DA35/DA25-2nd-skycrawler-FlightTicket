@@ -27,23 +27,24 @@ browser=webdriver.Chrome(service=service, options=chrome_options)
 
 # 네이버 항공권으로 이동
 browser.get('https://flight.naver.com')
+browser.maximize_window()
 
 
 
 """
-    자동 검색
+    Auto search
 
 """
 
 
 # 날짜 선택하는 함수 정의
 def select_day(month, day):
-    # 모든 날짜를 가져오기
+    
     all_days = browser.find_elements(By.CLASS_NAME, 'sc-kDDrLX.ctbFvd.month')  # class: 모든 날짜 테이블
     
     # 입력한 월과 일을 찾기 
     for day_group in all_days:
-        # 해당 월 찾기 
+        
         months = day_group.find_elements(By.CLASS_NAME, 'sc-iqcoie.dCaTmH')    # class: 0000.00 형식의 월 
         for month_element in months:
             # 월을 찾으면 해당 월의 날짜를 찾기
@@ -135,7 +136,7 @@ time.sleep(20)
 
 
 """
-항공권 크롤링
+    Crawling
 
 """
 # 항공권 구간
@@ -194,24 +195,30 @@ for l, val in enumerate(all_flight_tickets):
         except:
             continue
 
+# 브라우저 연결 끊기
+browser.close()
 
+"""
+    Dataframe
+"""
 # list -> dataframe
 flight_ticket_df=pd.DataFrame(tickets)
-
+# 가격순 정렬
+# flight_ticket_df.sort_values(['가격'],ascending=True)
 ### 저장 디렉토리 생성
 os.makedirs('tickets_info', exist_ok=True)
 ### 파일명-%Y-%m-%d
 c_day=datetime.date.today().strftime("%Y-%m-%d")
-file_path=f"tickets_info/from_{start_area}_to_{end_area}_{c_day}.csv"
+file_path=f"tickets_info/from{start_area}_to{end_area}_{start_month}{start_day}-{end_month}{end_day}.csv"
 flight_ticket_df.to_csv(file_path, index=False)
-# flight_ticket_df.sort_values(['가격'], ascending=True)
 
 print("============완료=============")
 
-'''
-    db 연결
+"""
+    Database connect
 
-'''
+"""
+
 # db 연결
 engine= create_engine(
     "mysql+pymysql://playdata:1234@127.0.0.1:3306/db?charset=utf8"
