@@ -140,7 +140,7 @@ target_elements = soup.select('#container > div.international_content__2Z9HD > d
 
 
 #txt 파일을 쓰기 모드로 열기
-with open('result3.txt', 'w') as f:
+with open('output.txt', 'w') as f:
     for element in target_elements:
             #필요없는 요소 제거
             for sub_element in element.select('.emissions_summary__2GO45, .route_caution__2c-3Y'):
@@ -151,12 +151,12 @@ with open('result3.txt', 'w') as f:
             f.write(element.text + '\n')
 
 #구분자 삽입
-#with open('output.txt', 'r') as file:
+with open('output.txt', 'r') as file:
     #data = file.read()
 # '항공' 뒤에 ' | ' 구분자 추가
-#modified_data = data.replace(' ', ',')  # '항공':'항공 |','ICN':'ICN|','SPN':'SPN|','항':'항|','편':'편|','분':'분|'
-#with open('modified_result.txt', 'w', encoding='utf-8') as file:
-#    file.write(modified_data)
+modified_data = data.replace(' ', ',')  # '항공':'항공 |','ICN':'ICN|','SPN':'SPN|','항':'항|','편':'편|','분':'분|'
+with open('modified_result.txt', 'w', encoding='utf-8') as file:
+    file.write(modified_data)
 
 
 #Dataframe
